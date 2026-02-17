@@ -10,8 +10,8 @@
 
   body {
     font-family: 'DM Sans', sans-serif;
-    background: #1a1a1a;
-    color: #e8e4df;
+    background: #f5f0ed;
+    color: #5c4f4f;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -22,11 +22,11 @@
   .converter {
     width: 100%;
     max-width: 400px;
-    background: #222;
+    background: #fffbf9;
     border-radius: 16px;
     padding: 24px;
-    border: 1px solid #333;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border: 1px solid #e8ddd8;
+    box-shadow: 0 4px 20px rgba(180, 160, 155, 0.15);
   }
 
   .header {
@@ -40,15 +40,15 @@
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.5px;
-    color: #aaa;
+    color: #9b8a9e;
     text-transform: uppercase;
   }
 
   .rate-badge {
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
-    background: #2a3a2a;
-    color: #6fcf6f;
+    background: #f0e6f0;
+    color: #9b7ea8;
     padding: 4px 10px;
     border-radius: 20px;
     font-weight: 500;
@@ -62,7 +62,7 @@
   .input-group label {
     display: block;
     font-size: 11px;
-    color: #666;
+    color: #b8a6a6;
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 6px;
@@ -80,23 +80,23 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 22px;
     font-weight: 600;
-    background: #1a1a1a;
-    border: 1px solid #333;
+    background: #f5f0ed;
+    border: 1px solid #e0d5cf;
     border-radius: 10px;
-    color: #fff;
+    color: #5c4f4f;
     padding: 12px 14px;
     outline: none;
     transition: border-color 0.2s;
   }
 
   .amount-input:focus {
-    border-color: #555;
+    border-color: #c9b1c9;
   }
 
   .amount-input.result {
-    color: #6fcf6f;
-    background: #1a201a;
-    border-color: #2a3a2a;
+    color: #9b7ea8;
+    background: #f7f0f7;
+    border-color: #ddd0e0;
   }
 
   select.currency-select {
@@ -104,10 +104,10 @@
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     font-weight: 700;
-    background: #2a2a2a;
-    border: 1px solid #333;
+    background: #f0e8e4;
+    border: 1px solid #e0d5cf;
     border-radius: 10px;
-    color: #fff;
+    color: #5c4f4f;
     padding: 0 12px;
     cursor: pointer;
     outline: none;
@@ -118,7 +118,7 @@
   }
 
   select.currency-select:hover {
-    border-color: #555;
+    border-color: #c9b1c9;
   }
 
   .swap-btn {
@@ -129,24 +129,24 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 1px solid #333;
-    background: #2a2a2a;
-    color: #888;
+    border: 1px solid #e0d5cf;
+    background: #f0e8e4;
+    color: #b8a6a6;
     cursor: pointer;
     transition: all 0.25s;
     font-size: 16px;
   }
 
   .swap-btn:hover {
-    background: #333;
-    color: #fff;
+    background: #e8ddd8;
+    color: #9b7ea8;
     transform: rotate(180deg);
   }
 
   .last-updated {
     text-align: center;
     font-size: 10px;
-    color: #444;
+    color: #c4b5b0;
     margin-top: 16px;
     font-family: 'JetBrains Mono', monospace;
   }
@@ -156,18 +156,18 @@
     margin: 10px auto 0;
     font-family: 'DM Sans', sans-serif;
     font-size: 11px;
-    background: #2a2a2a;
-    border: 1px solid #333;
+    background: #f0e6f0;
+    border: 1px solid #ddd0e0;
     border-radius: 8px;
-    color: #888;
+    color: #9b7ea8;
     padding: 6px 14px;
     cursor: pointer;
     transition: all 0.2s;
   }
 
   .refresh-btn:hover {
-    background: #333;
-    color: #fff;
+    background: #e8d8e8;
+    color: #7d6488;
   }
 </style>
 </head>
@@ -221,7 +221,6 @@
   var swapBtn = document.getElementById('swapBtn');
   var refreshBtn = document.getElementById('refreshBtn');
 
-  // Built-in rates (USD base) - works immediately, no API needed
   var rates = {
     USD: 1,
     EUR: 0.92,
@@ -293,10 +292,7 @@
   fromCurrency.onchange = convert;
   toCurrency.onchange = convert;
 
-  // Works immediately with built-in rates
   convert();
-
-  // Try live rates in background
   try { fetchLiveRates(); } catch(e) {}
 </script>
 </body>
