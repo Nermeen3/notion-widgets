@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f5f0ed;
+    color: #5c4f4f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 16px;
+  }
+
+  .calculator {
+    width: 100%;
+    max-width: 320px;
+    background: #fffbf9;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e8ddd8;
+    box-shadow: 0 4px 20px rgba(180, 160, 155, 0.15);
+  }
+
+  .display {
+    background: #f5f0ed;
+    border: 1px solid #e0d5cf;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: right;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .display-expr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #b8a6a6;
+    min-height: 20px;
+    word-break: break-all;
+  }
+
+  .display-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 600;
+    color: #5c4f4f;
+    word-break: break-all;
+    line-height: 1.2;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    border: 1px solid #e0d5cf;
+    border-radius: 10px;
+    padding: 14px 0;
+    cursor: pointer;
+    transition: all 0.15s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:active {
+    transform: scale(0.95);
+  }
+
+  .btn-num {
+    background: #fffbf9;
+    color: #5c4f4f;
+  }
+
+  .btn-num:hover {
+    background: #f5f0ed;
+  }
+
+  .btn-op {
+    background: #f0e6f0;
+    color: #9b7ea8;
+    border-color: #ddd0e0;
+  }
+
+  .btn-op:hover {
+    background: #e8d8e8;
+  }
+
+  .btn-func {
+    background: #f0e8e4;
+    color: #b8a6a6;
+    border-color: #e0d5cf;
+  }
+
+  .btn-func:hover {
+    background: #e8ddd8;
+    color: #9b8a9e;
+  }
+
+  .btn-eq {
+    background: #c9b1c9;
+    color: #fff;
+    border-color: #b89db8;
+  }
+
+  .btn-eq:hover {
+    background: #b89db8;
+  }
+
+  .btn-clear {
+    background: #f0ddd8;
+    color: #c4908a;
+    border-color: #e8ccc6;
+  }
+
+  .btn-clear:hover {
+    background: #e8ccc6;
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display">
+    <div class="display-expr" id="expr"></div>
+    <div class="display-result" id="result">0</div>
+  </div>
+  <div class="buttons">
+    <button class="btn btn-clear" onclick="clearAll()">C</button>
+    <button class="btn btn-func" onclick="backspace()">⌫</button>
+    <button class="btn btn-func" onclick="addChar('%')">%</button>
+    <button class="btn btn-op" onclick="addChar('÷')">÷</button>
+
+    <button class="btn btn-num" onclick="addChar('7')">7</button>
+    <button class="btn btn-num" onclick="addChar('8')">8</button>
+    <button class="btn btn-num" onclick="addChar('9')">9</button>
+    <button class="btn btn-op" onclick="addChar('×')">×</button>
+
+    <button class="btn btn-num" onclick="addChar('4')">4</button>
+    <button class="btn btn-num" onclick="addChar('5')">5</button>
+    <button class="btn btn-num" onclick="addChar('6')">6</button>
+    <button class="btn btn-op" onclick="addChar('-')">−</button>
+
+    <button class="btn btn-num" onclick="addChar('1')">1</button>
+    <button class="btn btn-num" onclick="addChar('2')">2</button>
+    <button class="btn btn-num" onclick="addChar('3')">3</button>
+    <button class="btn btn-op" onclick="addChar('+')">+</button>
+
+    <button class="btn btn-func" onclick="addChar('(')">(</button>
+    <button class="btn btn-num" onclick="addChar('0')">0</button>
+    <button class="btn btn-func" onclick="addChar('.')">.</button>
+    <button class="btn btn-eq" onclick="calculate()">=</button>
+  </div>
+</div>
+
+<script>
+  var expr = document.getElementById('expr');
+  var result = document.getElementById('result');
+  var current = '';
+  var justCalculated = false;
+
+  function addChar(ch) {
+    if (justCalculated && !isNaN(ch)) {
+      current = '';
+      justCalculated = false;
+    }
+    justCalculated = false;
+    current += ch;
+    result.textContent = current;
+    expr.textContent = '';
+  }
+
+  function clearAll() {
+    current = '';
+    result.textContent = '0';
+    expr.textContent = '';
+    justCalculated = false;
+  }
+
+  function backspace() {
+    current = current.slice(0, -1);
+    result.textContent = current || '0';
+    justCalculated = false;
+  }
+
+  function calculate() {
+    if (!current) return;
+    try {
+      var expression = current
+        .replace(/×/g, '*')
+        .replace(/÷/g, '/')
+        .replace(/−/g, '-')
+        .replace(/%/g, '/100');
+
+      var answer = Function('"use strict"; return (' + expression + ')')();
+
+      if (!isFinite(answer)) {
+        expr.textContent = current + ' =';
+        result.textContent = 'Error';
+        return;
+      }
+
+      var formatted = parseFloat(answer.toFixed(10)).toLocaleString('en-US', {
+        maximumFractionDigits: 10
+      });
+
+      expr.textContent = current + ' =';
+      result.textContent = formatted;
+      current = String(parseFloat(answer.toFixed(10)));
+      justCalculated = true;
+    } catch(e) {
+      expr.textContent = current;
+      result.textContent = 'Error';
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    var key = e.key;
+    if (key >= '0' && key <= '9') addChar(key);
+    else if (key === '.') addChar('.');
+    else if (key === '+') addChar('+');
+    else if (key === '-') addChar('-');
+    else if (key === '*') addChar('×');
+    else if (key === '/') { e.preventDefault(); addChar('÷'); }
+    else if (key === '%') addChar('%');
+    else if (key === '(' || key === ')') addChar(key);
+    else if (key === 'Enter' || key === '=') calculate();
+    else if (key === 'Backspace') backspace();
+    else if (key === 'Escape') clearAll();
+  });
+</script>
+</body>
+</html>
