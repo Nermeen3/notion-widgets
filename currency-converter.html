@@ -151,13 +151,23 @@
     font-family: 'JetBrains Mono', monospace;
   }
 
-  .loading-shimmer {
-    animation: shimmer 1.5s infinite;
+  .refresh-btn {
+    display: block;
+    margin: 10px auto 0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #888;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
   }
 
-  @keyframes shimmer {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+  .refresh-btn:hover {
+    background: #333;
+    color: #fff;
   }
 </style>
 </head>
@@ -197,53 +207,32 @@
     </div>
   </div>
 
-  <div class="last-updated" id="lastUpdated">fetching rates...</div>
+  <div class="last-updated" id="lastUpdated">approximate rates</div>
+  <button class="refresh-btn" id="refreshBtn">↻ Refresh live rates</button>
 </div>
 
 <script>
-  const fromAmount = document.getElementById('fromAmount');
-  const toAmount = document.getElementById('toAmount');
-  const fromCurrency = document.getElementById('fromCurrency');
-  const toCurrency = document.getElementById('toCurrency');
-  const rateBadge = document.getElementById('rateBadge');
-  const lastUpdated = document.getElementById('lastUpdated');
-  const swapBtn = document.getElementById('swapBtn');
+  var fromAmount = document.getElementById('fromAmount');
+  var toAmount = document.getElementById('toAmount');
+  var fromCurrency = document.getElementById('fromCurrency');
+  var toCurrency = document.getElementById('toCurrency');
+  var rateBadge = document.getElementById('rateBadge');
+  var lastUpdated = document.getElementById('lastUpdated');
+  var swapBtn = document.getElementById('swapBtn');
+  var refreshBtn = document.getElementById('refreshBtn');
 
-  let rates = {};
-
-  // Fetch rates from multiple APIs with fallback
-  async function fetchRates() {
-    try {
-      rateBadge.textContent = '...';
-      rateBadge.classList.add('loading-shimmer');
-
-      // Try open.er-api.com (free, supports GEL & JOD)
-      const res = await fetch('https://open.er-api.com/v6/latest/USD');
-      const data = await res.json();
-
-      if (data.result === 'success') {
-        rates = data.rates;
-        rateBadge.classList.remove('loading-shimmer');
-        lastUpdated.textContent = `rates from ${data.time_last_update_utc.slice(0, 16)}`;
-        convert();
-        return;
-      }
-      throw new Error('API failed');
-    } catch (e) {
-      // Fallback static rates (USD base, approximate)
-      rates = {
-        USD: 1, EUR: 0.92, GEL: 2.74, JOD: 0.709
-      };
-      rateBadge.classList.remove('loading-shimmer');
-      lastUpdated.textContent = 'using offline rates';
-      convert();
-    }
-  }
+  // Built-in rates (USD base) - works immediately, no API needed
+  var rates = {
+    USD: 1,
+    EUR: 0.92,
+    GEL: 2.74,
+    JOD: 0.709
+  };
 
   function convert() {
-    const from = fromCurrency.value;
-    const to = toCurrency.value;
-    const amount = parseFloat(fromAmount.value);
+    var from = fromCurrency.value;
+    var to = toCurrency.value;
+    var amount = parseFloat(fromAmount.value);
 
     if (!amount || !rates[from] || !rates[to]) {
       toAmount.value = '';
@@ -251,31 +240,64 @@
       return;
     }
 
-    // Convert via USD base
-    const inUsd = amount / rates[from];
-    const result = inUsd * rates[to];
-    const rate = rates[to] / rates[from];
+    var inUsd = amount / rates[from];
+    var result = inUsd * rates[to];
+    var rate = rates[to] / rates[from];
 
     toAmount.value = result.toLocaleString('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
 
-    rateBadge.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+    rateBadge.textContent = '1 ' + from + ' = ' + rate.toFixed(4) + ' ' + to;
   }
 
-  swapBtn.addEventListener('click', () => {
-    const tmpCur = fromCurrency.value;
+  function fetchLiveRates() {
+    refreshBtn.textContent = '↻ Loading...';
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://open.er-api.com/v6/latest/USD', true);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var data = JSON.parse(xhr.responseText);
+          if (data.result === 'success') {
+            rates.EUR = data.rates.EUR;
+            rates.GEL = data.rates.GEL;
+            rates.JOD = data.rates.JOD;
+            rates.USD = 1;
+            lastUpdated.textContent = 'live rates updated ✓';
+            convert();
+          }
+        } catch(e) {
+          lastUpdated.textContent = 'using approximate rates';
+        }
+      }
+      refreshBtn.textContent = '↻ Refresh live rates';
+    };
+    xhr.onerror = function() {
+      lastUpdated.textContent = 'using approximate rates';
+      refreshBtn.textContent = '↻ Refresh live rates';
+    };
+    xhr.send();
+  }
+
+  swapBtn.onclick = function() {
+    var tmpCur = fromCurrency.value;
     fromCurrency.value = toCurrency.value;
     toCurrency.value = tmpCur;
     convert();
-  });
+  };
 
-  fromAmount.addEventListener('input', convert);
-  fromCurrency.addEventListener('change', convert);
-  toCurrency.addEventListener('change', convert);
+  refreshBtn.onclick = fetchLiveRates;
+  fromAmount.oninput = convert;
+  fromCurrency.onchange = convert;
+  toCurrency.onchange = convert;
 
-  fetchRates();
+  // Works immediately with built-in rates
+  convert();
+
+  // Try live rates in background
+  try { fetchLiveRates(); } catch(e) {}
 </script>
 </body>
 </html>
